@@ -62,6 +62,7 @@ func PushSquashFS(ctx context.Context, resolver remotes.Resolver, fileName strin
 
 // PullSquashFS pulls one or more layers from a remote repository
 func PullSquashFS(ctx context.Context, resolver remotes.Resolver, reference string, targetDirectory string) (ocispec.Descriptor, []ocispec.Descriptor, error) {
+	log.Printf("Pulling %s to store in %s\n", reference, targetDirectory)
 	fileStore := content.NewFileStore(targetDirectory)
 	defer fileStore.Close()
 	return oras.Pull(ctx, resolver, reference, fileStore, oras.WithAllowedMediaTypes(AllowedMediaTypes()))

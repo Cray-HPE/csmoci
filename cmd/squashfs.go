@@ -66,11 +66,11 @@ to quickly create a Cobra application.`,
 		fmt.Println("squashfs pull called with args: ", args)
 		ctx := context.Background()
 		resolver := docker.NewResolver(docker.ResolverOptions{})
-		desc, _, err := squashfs.PullSquashFS(ctx, resolver, args[1], args[0])
+		desc, _, err := squashfs.PullSquashFS(ctx, resolver, args[0], args[1])
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Pulled from %s with digest %s\n", args[1], desc.Digest)
+		fmt.Printf("Pulled from %s with digest %s\n", args[0], desc.Digest)
 	},
 }
 
