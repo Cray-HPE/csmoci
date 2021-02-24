@@ -3,6 +3,7 @@ package squashfs
 import (
 	"context"
 	"io/ioutil"
+	"log"
 	"strings"
 
 	"github.com/containerd/containerd/remotes"
@@ -11,15 +12,20 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
+// SupportedCompression returns the list of supported compression algorithms
+func SupportedCompression() []string {
+	return []string{"gzip", "lzo", "lz4", "xz", "zstd"}
+}
+
 // getSquashfsMediaTypes is a workaround because go doesn't support maps as constants
 func getSquashfsMediaTypes() map[string]string {
 	const baseMediaType = "application/vnd.oci.image.layer.v1.squashfs"
+
 	mediaTypes := make(map[string]string)
 	mediaTypes[""] = baseMediaType
-	mediaTypes["gzip"] = baseMediaType + "+gzip"
-	mediaTypes["lso"] = baseMediaType + "+lzo"
-	mediaTypes["lzma"] = baseMediaType + "+lzma"
-	mediaTypes["xz"] = baseMediaType + "+xz"
+	for _, compression := range SupportedCompression() {
+		mediaTypes[compression] = baseMediaType + "+" + compression
+	}
 	return mediaTypes
 }
 
@@ -31,10 +37,10 @@ func getSquashfsMediaType(compression string) string {
 	return getSquashfsMediaTypes()[strings.ToLower(compression)]
 }
 
-// getAllowedMediaTypes returns the valid media types for squashfs
-func getAllowedMediaTypes() []string {
+// AllowedMediaTypes returns the valid media types for squashfs
+func AllowedMediaTypes() []string {
 	var allowedMediaTypes []string
-	for _, t := range getAllowedMediaTypes() {
+	for _, t := range getSquashfsMediaTypes() {
 		allowedMediaTypes = append(allowedMediaTypes, t)
 	}
 	return allowedMediaTypes
@@ -48,9 +54,9 @@ func PushSquashFS(ctx context.Context, resolver remotes.Resolver, fileName strin
 	}
 	// Push file(s) w custom mediatype to registry
 	memoryStore := content.NewMemoryStore()
-	desc := memoryStore.Add(fileName, getSquashfsMediaType((compression)), fileContent)
+	log.Printf("Adding %s with mediaType: %s\n", fileName, getSquashfsMediaType(compression))
+	desc := memoryStore.Add(fileName, getSquashfsMediaType(compression), fileContent)
 	pushContents := []ocispec.Descriptor{desc}
-	// fmt.Printf("Pushing %s to %s...\n", fileName, ref)
 	return oras.Push(ctx, resolver, reference, memoryStore, pushContents)
 }
 
@@ -58,5 +64,5 @@ func PushSquashFS(ctx context.Context, resolver remotes.Resolver, fileName strin
 func PullSquashFS(ctx context.Context, resolver remotes.Resolver, reference string, targetDirectory string) (ocispec.Descriptor, []ocispec.Descriptor, error) {
 	fileStore := content.NewFileStore(targetDirectory)
 	defer fileStore.Close()
-	return oras.Pull(ctx, resolver, reference, fileStore, oras.WithAllowedMediaTypes(getAllowedMediaTypes()))
+	return oras.Pull(ctx, resolver, reference, fileStore, oras.WithAllowedMediaTypes(AllowedMediaTypes()))
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile, versionOutput string
+var cfgFile, repositoryUrl, versionOutput string
 var versionSimple, versionGit bool
 
 // rootCmd represents the base command when called without any subcommands
@@ -83,6 +83,8 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.PersistentFlags().StringVarP(&repositoryUrl, "repository", "r", "localhost:5000", "OCI Repository URL")
+
 	versionCmd.Flags().StringVarP(&versionOutput, "output", "o", "pretty", "output format pretty,json")
 	versionCmd.Flags().BoolVarP(&versionSimple, "simple", "s", false, "Simple version on a single line")
 	versionCmd.Flags().BoolVarP(&versionGit, "git", "g", false, "Simple commit sha of the source tree on a single line. \"-dirty\" added to the end if uncommitted changes present")
