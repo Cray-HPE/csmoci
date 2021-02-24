@@ -12,7 +12,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var cfgFile, versionOutput string
+var versionSimple, versionGit bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -34,18 +35,16 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("version called with args: ", args)
-		v := viper.GetViper()
 		clientVersion := version.Get()
-		if v.GetBool("simple") {
+		if versionSimple {
 			fmt.Printf("%v.%v\n", clientVersion.Major, clientVersion.Minor)
 			os.Exit(0)
 		}
-		if v.GetBool("git") {
+		if versionGit {
 			fmt.Println(clientVersion.GitCommit)
 			os.Exit(0)
 		}
-		switch output := v.GetString("output"); output {
+		switch output := versionOutput; output {
 		case "pretty":
 			fmt.Printf("%-15s: %s\n", "Build Commit", clientVersion.GitCommit)
 			fmt.Printf("%-15s: %s\n", "Build Time", clientVersion.BuildDate)
@@ -84,9 +83,9 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	rootCmd.AddCommand(versionCmd)
-	versionCmd.Flags().StringP("output", "o", "pretty", "output format pretty,json")
-	versionCmd.Flags().BoolP("simple", "s", false, "Simple version on a single line")
-	versionCmd.Flags().BoolP("git", "g", false, "Simple commit sha of the source tree on a single line. \"-dirty\" added to the end if uncommitted changes present")
+	versionCmd.Flags().StringVarP(&versionOutput, "output", "o", "pretty", "output format pretty,json")
+	versionCmd.Flags().BoolVarP(&versionSimple, "simple", "s", false, "Simple version on a single line")
+	versionCmd.Flags().BoolVarP(&versionGit, "git", "g", false, "Simple commit sha of the source tree on a single line. \"-dirty\" added to the end if uncommitted changes present")
 }
 
 // initConfig reads in config file and ENV variables if set.
