@@ -1,3 +1,4 @@
+# Copyright 2021 Hewlett Packard Enterprise Development LP
 SHELL := /bin/bash
 VERSION := $(shell cat .version)
 
@@ -37,6 +38,7 @@ endif
 	fmt \
 	env \
 	build \
+	upx \
 	doc \
 	version
 
@@ -60,6 +62,7 @@ help:
 	@echo '    tidy               Run go mod tidy.'
 	@echo '    env                Display Go environment.'
 	@echo '    build              Build project for current platform.'
+	@echo '    upx                Build project for current platform and compress resulting binary with upx. https://upx.github.io/'
 	@echo '    doc                Start Go documentation server on port 8080.'
 	@echo '    version            Display Go version.'
 	@echo ''
@@ -118,11 +121,15 @@ reset:
 
 build: fmt
 	go build -o bin/csmoci -ldflags "\
+	-s -w \
 	-X github.com/cray-hpe/csmoci/pkg/version.gitVersion=${.GIT_VERSION} \
 	-X github.com/cray-hpe/csmoci/pkg/version.fsVersion=${.FS_VERSION} \
 	-X github.com/cray-hpe/csmoci/pkg/version.buildDate=${.BUILDTIME} \
 	-X github.com/cray-hpe/csmoci/pkg/version.sha1ver=${.GIT_COMMIT_AND_BRANCH}"
 	bin/csmoci version
+
+upx: build
+	upx bin/csmoci
 
 doc:
 	godoc -http=:8080 -index

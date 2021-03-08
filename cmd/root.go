@@ -1,3 +1,7 @@
+/*
+Copyright 2021 Hewlett Packard Enterprise Development LP
+*/
+
 package cmd
 
 import (
@@ -12,22 +16,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile, repositoryUrl, versionOutput string
+var cfgFile, repositoryURL, versionOutput string
 var versionSimple, versionGit bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "csmoci",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "A tool for managing all artifacts using an OCI registry",
+	Long: `csmoci is a helper application for interacting with oci registries for artifacts 
+	other than standard container images.  Each subcommand works with a different type of artifact.
+	Not all artifact types support all flags.
+	
+	Obtain the latest version of this tool from https://github.com/Cray-HPE/csmoci	`,
 }
 
 // versionCmd represents the version command
@@ -83,7 +83,7 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.PersistentFlags().StringVarP(&repositoryUrl, "repository", "r", "localhost:5000", "OCI Repository URL")
+	rootCmd.PersistentFlags().StringVarP(&repositoryURL, "repository", "r", "localhost:5000", "OCI Repository URL")
 
 	versionCmd.Flags().StringVarP(&versionOutput, "output", "o", "pretty", "output format pretty,json")
 	versionCmd.Flags().BoolVarP(&versionSimple, "simple", "s", false, "Simple version on a single line")
